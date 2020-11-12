@@ -1,6 +1,6 @@
 
 module "virtualbox-bootstrapper" {
-  source = "../../../modules/bootstrapper"
+  source = "../../../modules/fcos-pxe-bootstrapper"
   host_name = "befruchter.home.el"
   public_dns = "192.168.2.10"
 
