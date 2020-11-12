@@ -5,7 +5,7 @@ module "virtualbox-bootstrapper" {
   public_dns = "192.168.2.10"
 
   net_config = {
-    "eth1" = {
+    "enp0s8" = {
       "ipv4" = {
         "method" = "manual"
         "address1" = "10.10.0.1/16"
@@ -13,7 +13,7 @@ module "virtualbox-bootstrapper" {
         "dns-search" = "local.vlan;"
       }
     }
-    "eth2" = {
+    "enp0s9" = {
       "ipv4" = {
         "method" = "manual"
         "address1" = "192.168.56.19/24"
