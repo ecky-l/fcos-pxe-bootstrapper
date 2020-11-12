@@ -1,0 +1,5 @@
+/.terraform/
+/output/
+/**/.terraform/
+/**/terraform.*
+/**/output/
