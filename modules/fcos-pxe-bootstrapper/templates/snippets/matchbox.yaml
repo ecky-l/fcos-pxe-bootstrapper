@@ -5,7 +5,7 @@ storage:
   directories:
     - path: /var/local/etc/matchbox
       mode: 0755
-    - path: /var/local/lib/matchbox/assets
+    - path: /mnt/data/matchbox/assets
       mode: 0755
   files:
     - path: /var/local/etc/matchbox/ca.crt
@@ -26,13 +26,6 @@ storage:
       contents:
         inline: |
           ${ indent(10, server_key) }
-    - path: /usr/local/lib/install-matchbox.sh
-      mode: 0755
-      overwrite: true
-      contents:
-        inline: |
-          #!/bin/bash -e
-          touch /var/log/provision-done/install-matchbox
     - path: /usr/local/bin/install-matchbox.sh
       mode: 0755
       overwrite: true
@@ -40,13 +33,15 @@ storage:
         inline: |
           #!/bin/bash -e
           echo "creating matchbox container and systemd unit to start it"
-          podman create --name matchbox -p ${vlan_ip}:8080:8080 -p 8081:8081 \
-                        -v /var/local/lib/matchbox:/var/lib/matchbox:Z \
-                        -v /var/local/etc/matchbox:/etc/matchbox:Z,ro \
-                        quay.io/coreos/matchbox:latest \
-                        -address=0.0.0.0:8080 \
-                        -rpc-address=0.0.0.0:8081 \
-                        -log-level=debug
+          podman create \
+                  --name matchbox \
+                  -p ${vlan_ip}:8080:8080 -p 8081:8081 \
+                  -v /mnt/data/matchbox:/var/lib/matchbox:Z \
+                  -v /var/local/etc/matchbox:/etc/matchbox:Z,ro \
+                  quay.io/coreos/matchbox:latest \
+                  -address=0.0.0.0:8080 \
+                  -rpc-address=0.0.0.0:8081 \
+                  -log-level=debug
           cd /etc/systemd/system/ && podman generate systemd -fn matchbox ; cd -
           systemctl daemon-reload
           systemctl enable container-matchbox
@@ -60,16 +55,16 @@ storage:
           #!/bin/bash -e
           FCOS_VERSIONS=${ join(" ", download_fcos_versions) }
           DOWNLOAD_URL=https://builds.coreos.fedoraproject.org/prod/streams/stable/builds
-          FCOS_ASSETS_DIR=/var/local/lib/matchbox/assets/fedora-coreos
+          FCOS_ASSETS_DIR=/mnt/data/matchbox/assets/fedora-coreos
           mkdir -p $${FCOS_ASSETS_DIR}
           cd $${FCOS_ASSETS_DIR}
           for v in $${FCOS_VERSIONS}; do
-              curl -fsO $${DOWNLOAD_URL}/$${v}/x86_64/fedora-coreos-$${v}-live-kernel-x86_64
-              curl -fsO $${DOWNLOAD_URL}/$${v}/x86_64/fedora-coreos-$${v}-live-kernel-x86_64.sig
-              curl -fsO $${DOWNLOAD_URL}/$${v}/x86_64/fedora-coreos-$${v}-live-initramfs.x86_64.img
-              curl -fsO $${DOWNLOAD_URL}/$${v}/x86_64/fedora-coreos-$${v}-live-initramfs.x86_64.img.sig
-              curl -fsO $${DOWNLOAD_URL}/$${v}/x86_64/fedora-coreos-$${v}-metal.x86_64.raw.xz
-              curl -fsO $${DOWNLOAD_URL}/$${v}/x86_64/fedora-coreos-$${v}-metal.x86_64.raw.xz.sig
+              for w in live-kernel-x86_64 live-initramfs.x86_64.img metal.x86_64.raw.xz; do
+                  if test ! -f $${v}-$${w}; then
+                      curl -fsO $${DOWNLOAD_URL}/$${v}/x86_64/fedora-coreos-$${v}-$${w}
+                      curl -fsO $${DOWNLOAD_URL}/$${v}/x86_64/fedora-coreos-$${v}-$${w}.sig
+                  fi
+              done
           done
           touch /var/log/provision-done/download-fcos-pxe
 systemd:

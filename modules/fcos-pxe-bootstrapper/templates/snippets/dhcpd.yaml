@@ -2,8 +2,11 @@
 variant: fcos
 version: 1.1.0
 storage:
+  directories:
+    - path: /mnt/data/dhcpd
+      mode: 0755
   files:
-    - path: /var/local/lib/dhcpd/dhcpd.conf
+    - path: /mnt/data/dhcpd/dhcpd.conf
       mode: 0644
       overwrite: true
       contents:
@@ -31,7 +34,7 @@ storage:
         inline: |
           #!/bin/bash -e
           echo "creating dhcpd container and systemd unit to start it"
-          podman create --name dhcpd --net host -v /var/local/lib/dhcpd:/data:Z networkboot/dhcpd ${dhcpd.interface}
+          podman create --name dhcpd --net host -v /mnt/data/dhcpd:/data:Z networkboot/dhcpd ${dhcpd.interface}
           cd /etc/systemd/system/ && podman generate systemd -fn dhcpd ; cd -
           systemctl daemon-reload
           systemctl enable container-dhcpd

@@ -5,6 +5,8 @@ storage:
   directories:
     - path: /var/local/etc/pdns/conf.d
       mode: 0755
+    - path: /mnt/data/pdns-bind
+      mode: 0755
   files:
     - path: /var/local/etc/pdns/pdns.conf
       mode: 0644
@@ -15,7 +17,7 @@ storage:
           local-address=127.0.0.1
           local-port=5300
           launch=bind
-          bind-config=/etc/pdns/bind/named.conf
+          bind-config=/etc/pdns-bind/named.conf
           daemon=no
           guardian=yes
           include-dir=/etc/pdns/conf.d
@@ -24,19 +26,19 @@ storage:
           setuid=pdns
           log-dns-details=yes
           log-dns-queries=yes
-    - path: /var/local/etc/pdns/bind/named.conf
+    - path: /mnt/data/pdns-bind/named.conf
       mode: 0644
-      overwrite: true
+      overwrite: false
       contents:
         inline: |
           zone "local.vlan" {
               type master;
-              file "/etc/pdns/bind/local.vlan.zone";
+              file "/etc/pdns-bind/local.vlan.zone";
               allow-update { none; };
           };
-    - path: /var/local/etc/pdns/bind/local.vlan.zone
+    - path: /mnt/data/pdns-bind/local.vlan.zone
       mode: 0644
-      overwrite: true
+      overwrite: false
       contents:
         inline: |
           $ORIGIN local.vlan	; base for unqualified names
@@ -70,9 +72,17 @@ storage:
           #!/bin/bash -e
           echo "creating dns pod with pdns and pdns-recursor containers"
           podman pod create -p ${vlan_config.ipv4}:53:53/udp -p ${vlan_config.ipv4}:53:53/tcp -n dns
-          podman create -d --name pdns -v /var/local/etc/pdns:/etc/pdns:Z --pod dns synyx/pdns
-          podman create -d -v /var/local/etc/pdns-recursor/recursor.conf:/etc/pdns/recursor.conf:Z \
-              --pod dns --name pdns-recursor lmnetworks/pdns-recursor
+          podman create \
+                  --pod dns \
+                  --name pdns \
+                  -v /var/local/etc/pdns:/etc/pdns:Z \
+                  -v /mnt/data/pdns-bind:/etc/pdns-bind:Z \
+                  synyx/pdns
+          podman create \
+                  --pod dns \
+                  --name pdns-recursor \
+                  -v /var/local/etc/pdns-recursor/recursor.conf:/etc/pdns/recursor.conf:Z \
+                  lmnetworks/pdns-recursor
           cd /etc/systemd/system/ && podman generate systemd -fn dns ; cd -
           systemctl daemon-reload
           systemctl enable pod-dns
