@@ -4,6 +4,17 @@ module "virtualbox-bootstrapper" {
   host_name = "befruchter.home.el"
   public_dns = "192.168.2.10"
 
+  dhcpd_config = {
+    interface = "enp0s8"
+    domain_name = "local.vlan"
+    dns = "10.10.0.1"
+    net = "10.10.0.0"
+    netmask = "255.255.0.0"
+    range_lower = "10.10.1.0"
+    range_upper = "10.10.255.254"
+    broadcast = "10.10.255.255"
+  }
+
   net_config = {
     "enp0s8" = {
       "ipv4" = {
@@ -22,7 +33,7 @@ module "virtualbox-bootstrapper" {
   }
 
   ssh_authorized_keys = [
-    file("~/.ssh/id_ed25519.pub")
+    file("~/.ssh/id_rsa.pub")
   ]
 }
 resource "local_file" "bootstrapper-ignition" {
