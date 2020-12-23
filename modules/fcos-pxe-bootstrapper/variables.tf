@@ -69,6 +69,6 @@ variable "download_fcos_versions" {
   type = list(string)
   description = "A list of Fedora CoreOS versions for which the PXE files should be downloaded to matchbox assets dir"
   default = [
-    "32.20201018.3.0"
+    "33.20201201.3.0"
   ]
 }

@@ -34,7 +34,13 @@ storage:
         inline: |
           #!/bin/bash -e
           echo "creating dhcpd container and systemd unit to start it"
-          podman create --name dhcpd --net host -v /mnt/data/dhcpd:/data:Z networkboot/dhcpd ${dhcpd.interface}
+          podman create \
+                  --name dhcpd \
+                  --network host \
+                  --cap-add CAP_NET_RAW \
+                  -v /mnt/data/dhcpd:/data:Z \
+                  networkboot/dhcpd \
+                  ${dhcpd.interface}
           cd /etc/systemd/system/ && podman generate systemd -fn dhcpd ; cd -
           systemctl daemon-reload
           systemctl enable container-dhcpd
