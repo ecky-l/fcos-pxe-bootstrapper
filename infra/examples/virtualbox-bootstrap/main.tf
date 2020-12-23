@@ -1,3 +1,35 @@
+module "vb_snippets" {
+  source = "git::https://github.com/ecky-l/fcos-ignition-snippets.git//modules/ignition-snippets"
+
+  user_authorized_keys = {
+    befruchter = [
+      file("~/.ssh/id_rsa.pub")
+    ]
+  }
+
+  networks = {
+    befruchter = {
+      "enp0s8" = {
+        "ipv4" = {
+          "method" = "manual"
+          "address1" = "10.10.0.1/16"
+          "dns" = "10.10.0.1;"
+          "dns-search" = "local.vlan;"
+        }
+      }
+      "enp0s9" = {
+        "ipv4" = {
+          "method" = "manual"
+          "address1" = "192.168.56.19/24"
+        }
+      }
+    }
+  }
+
+  root_partition_size_gib = {
+    befruchter = 8
+  }
+}
 
 module "virtualbox-bootstrapper" {
   source = "../../../modules/fcos-pxe-bootstrapper"
@@ -14,28 +46,13 @@ module "virtualbox-bootstrapper" {
     range_upper = "10.10.255.254"
     broadcast = "10.10.255.255"
   }
-
-  net_config = {
-    "enp0s8" = {
-      "ipv4" = {
-        "method" = "manual"
-        "address1" = "10.10.0.1/16"
-        "dns" = "10.10.0.1;"
-        "dns-search" = "local.vlan;"
-      }
-    }
-    "enp0s9" = {
-      "ipv4" = {
-        "method" = "manual"
-        "address1" = "192.168.56.19/24"
-      }
-    }
-  }
-
-  ssh_authorized_keys = [
-    file("~/.ssh/id_rsa.pub")
+  snippets = [
+    module.vb_snippets.user_snippets.befruchter.content,
+    module.vb_snippets.storage_snippets.befruchter.content,
+    module.vb_snippets.network_snippets.befruchter.content,
   ]
 }
+
 resource "local_file" "bootstrapper-ignition" {
   content = module.virtualbox-bootstrapper.bootstrapper-ignition
   filename = "output/bootstrapper.ign"

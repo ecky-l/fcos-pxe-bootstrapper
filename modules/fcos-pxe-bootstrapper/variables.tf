@@ -1,6 +1,7 @@
-variable "ssh_authorized_keys" {
-  type        = list(string)
-  description = "SSH public keys for user 'core'"
+variable "snippets" {
+  type = list(string)
+  description = "additional ignition snippets"
+  default = []
 }
 
 variable "public_dns" {
@@ -50,24 +51,6 @@ variable "dhcpd_config" {
     range_lower = "10.10.1.0"
     range_upper = "10.10.255.254"
     broadcast = "10.10.255.255"
-  }
-}
-
-variable "net_config" {
-  type = map(map(map(string)))
-  description = <<EOD
-NetworkManager profile settings. Toplevel keys correspond to a profile (NIC), next level keys to INI keys within
-the profile. See https://developer.gnome.org/NetworkManager/stable/nm-settings.html for a complete reference
-EOD
-  default = {
-    "eth0" = {
-      "ipv4" = {
-        "method" = "auto"
-      },
-      "ipv6" = {
-        "method" = "auto"
-      }
-    }
   }
 }
 

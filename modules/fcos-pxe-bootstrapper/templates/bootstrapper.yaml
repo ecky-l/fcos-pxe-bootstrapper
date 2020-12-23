@@ -1,13 +1,6 @@
 ---
 variant: fcos
 version: 1.1.0
-passwd:
-  users:
-    - name: core
-      ssh_authorized_keys:
-        %{~ for key in ssh_authorized_keys ~}
-        - ${key}
-        %{~ endfor ~}
 storage:
   directories:
     - path: /var/log/provision-done
@@ -26,7 +19,6 @@ storage:
           #!/bin/bash
           hostnamectl set-hostname --static ${host_name}
           touch /var/log/provision-done/install-dependencies
-
 systemd:
   units:
     - name: docker.service

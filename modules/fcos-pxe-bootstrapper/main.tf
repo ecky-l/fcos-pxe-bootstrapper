@@ -1,7 +1,7 @@
 
 //resource "local_file" "test" {
 //  filename = "debug/out.yaml"
-//  content = templatefile("${path.module}/templates/snippets/net-config.yaml", {
+//  content = templatefile("${path.module}/templates/snippets/vlan-config.yaml", {
 //    net_config = var.net_config
 //    vlan_config = var.vlan_config
 //    public_interface = var.public_interface
@@ -12,11 +12,9 @@ data "ct_config" "bootstrapper-ignition" {
   strict = true
   content = templatefile("${path.module}/templates/bootstrapper.yaml", {
     host_name = var.host_name
-    ssh_authorized_keys = var.ssh_authorized_keys
   })
-  snippets = [
-    templatefile("${path.module}/templates/snippets/net-config.yaml", {
-      net_config = var.net_config
+  snippets = concat (var.snippets, [
+    templatefile("${path.module}/templates/snippets/vlan-config.yaml", {
       vlan_config = var.vlan_config
       public_interface = var.public_interface
     }),
@@ -38,5 +36,5 @@ data "ct_config" "bootstrapper-ignition" {
       vlan_config = var.vlan_config
       public_dns = var.public_dns
     })
-  ]
+  ])
 }
