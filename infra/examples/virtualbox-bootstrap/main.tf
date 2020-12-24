@@ -26,8 +26,10 @@ module "vb_snippets" {
     }
   }
 
-  root_partition_size_gib = {
-    befruchter = 8
+  root_partition = {
+    befruchter = {
+      size = 8
+    }
   }
 }
 

@@ -59,8 +59,9 @@ storage:
           mkdir -p $${FCOS_ASSETS_DIR}
           cd $${FCOS_ASSETS_DIR}
           for v in $${FCOS_VERSIONS}; do
-              for w in live-kernel-x86_64 live-initramfs.x86_64.img metal.x86_64.raw.xz; do
-                  if test ! -f $${v}-$${w}; then
+              for w in live-kernel-x86_64 live-initramfs.x86_64.img live-rootfs.x86_64.img metal.x86_64.raw.xz; do
+                  if test ! -f fedora-coreos-$${v}-$${w}; then
+                      echo downloading fedora-coreos-$${v}-$${w} and signature
                       curl -fsO $${DOWNLOAD_URL}/$${v}/x86_64/fedora-coreos-$${v}-$${w}
                       curl -fsO $${DOWNLOAD_URL}/$${v}/x86_64/fedora-coreos-$${v}-$${w}.sig
                   fi
